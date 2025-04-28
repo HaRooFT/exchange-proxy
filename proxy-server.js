@@ -10,18 +10,22 @@ app.use(cors());
 
 app.get("/", async (req, res) => {
     const searchdate = req.query.searchdate || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const url = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${API_KEY}&searchdate=${searchdate}&data=AP01`;
+    const apiUrl = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${API_KEY}&searchdate=${searchdate}&data=AP01`;
 
     try {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
-        const response = await axios.get(url, {
+        const response = await axios.get(apiUrl, {
             httpsAgent,
             timeout: 5000,
             maxRedirects: 5,
-            validateStatus: (status) => status >= 200 && status < 400,  // ✅ 추가
+            validateStatus: (status) => status >= 200 && status < 400,
             headers: {
-                "User-Agent": "Mozilla/5.0"  // ✅ 추가
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
             }
         });
 
@@ -32,7 +36,7 @@ app.get("/", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 10000;  // ✅ Render는 10000 포트를 사용함
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`✅ Proxy server is running on port ${PORT}`);
 });
