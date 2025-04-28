@@ -17,19 +17,22 @@ app.get("/", async (req, res) => {
 
         const response = await axios.get(url, {
             httpsAgent,
+            timeout: 5000,
+            maxRedirects: 5,
+            validateStatus: (status) => status >= 200 && status < 400,  // ✅ 추가
             headers: {
-                "User-Agent": "Mozilla/5.0"
+                "User-Agent": "Mozilla/5.0"  // ✅ 추가
             }
         });
 
         res.json(response.data);
     } catch (error) {
-        console.error("Proxy Error:", error);
+        console.error("Proxy Error:", error.message || error);
         res.status(500).json({ error: "환율 데이터를 가져올 수 없습니다." });
     }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;  // ✅ Render는 10000 포트를 사용함
 app.listen(PORT, () => {
-    console.log(`Proxy server is running on port ${PORT}`);
+    console.log(`✅ Proxy server is running on port ${PORT}`);
 });
