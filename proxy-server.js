@@ -10,24 +10,37 @@ app.use(cors());
 
 app.get("/", async (req, res) => {
     const searchdate = req.query.searchdate || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const apiUrl = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${API_KEY}&searchdate=${searchdate}&data=AP01`;
+    let url = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${API_KEY}&searchdate=${searchdate}&data=AP01`;
 
     try {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
-        const response = await axios.get(apiUrl, {
+        let response = await axios.get(url, {
             httpsAgent,
-            timeout: 5000,
-            maxRedirects: 5,
-            validateStatus: (status) => status >= 200 && status < 400,
             headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Connection": "keep-alive",
-                "Upgrade-Insecure-Requests": "1"
+                "User-Agent": "Mozilla/5.0"
+            },
+            maxRedirects: 0,
+            validateStatus: function (status) {
+                return status >= 200 && status < 400; // 3xx 까지도 통과시킴
             }
         });
+
+        // 만약 302 리다이렉트면 Location 헤더 따로 처리
+        if (response.status === 302 && response.headers.location) {
+            let redirectUrl = response.headers.location;
+            if (redirectUrl.startsWith('/')) {
+                redirectUrl = `https://www.koreaexim.go.kr${redirectUrl}`;
+            }
+            console.log(`➡️ 리다이렉트 감지: ${redirectUrl}`);
+
+            response = await axios.get(redirectUrl, {
+                httpsAgent,
+                headers: {
+                    "User-Agent": "Mozilla/5.0"
+                }
+            });
+        }
 
         res.json(response.data);
     } catch (error) {
@@ -36,7 +49,7 @@ app.get("/", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ Proxy server is running on port ${PORT}`);
 });
