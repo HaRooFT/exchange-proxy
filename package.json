@@ -1,13 +1,19 @@
-{
-  "name": "exchange-proxy",
-  "version": "1.0.0",
-  "main": "proxy-server.js",
-  "scripts": {
-    "start": "node proxy-server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "axios": "^1.4.0",
-    "cors": "^2.8.5"
-  }
-}
+diff --git a/package.json b/package.json
+index 427a7f7a2d12451c52907b1600dc04e3fb8f7375..d7f461fa735240a4939ce03eeb9a4160028f81f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,13 +1,14 @@
+ {
+   "name": "exchange-proxy",
+   "version": "1.0.0",
+   "main": "proxy-server.js",
+   "scripts": {
+     "start": "node proxy-server.js"
+   },
+   "dependencies": {
++    "dotenv": "^16.4.5",
+     "express": "^4.18.2",
+     "axios": "^1.4.0",
+     "cors": "^2.8.5"
+   }
+ }
