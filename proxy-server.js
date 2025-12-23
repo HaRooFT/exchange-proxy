@@ -1,35 +1,16 @@
 diff --git a/proxy-server.js b/proxy-server.js
-index 891cfe384fd5ad0c45c43fe52e3da1ee7dbd8174..85058718627f49054ff51b4be1d0b4fd196637bc 100644
+index 891cfe384fd5ad0c45c43fe52e3da1ee7dbd8174..7cc3daa1071858987f8f5a5cd71c75514e705e5f 100644
 --- a/proxy-server.js
 +++ b/proxy-server.js
-@@ -1,38 +1,63 @@
+@@ -1,55 +1,63 @@
++require("dotenv").config();
  const express = require("express");
  const https = require("https");
  const axios = require("axios");
  const cors = require("cors");
-+const fs = require("fs");
-+const path = require("path");
  
  const app = express();
 -const API_KEY = "kfbE15PUHWgUZTf2cTLMnZ8EU0f44UCp";
-+
-+function loadEnvFromFile() {
-+    if (process.env.API_KEY) return;
-+
-+    const envPath = path.join(__dirname, ".env");
-+    if (!fs.existsSync(envPath)) return;
-+
-+    const envContents = fs.readFileSync(envPath, "utf8");
-+    envContents.split(/\r?\n/).forEach((line) => {
-+        const match = line.match(/^\s*([^#=]+?)\s*=\s*(.*)\s*$/);
-+        if (match && !process.env[match[1]]) {
-+            process.env[match[1]] = match[2];
-+        }
-+    });
-+}
-+
-+loadEnvFromFile();
-+
 +const API_KEY = process.env.API_KEY;
  
  app.use(cors());
@@ -68,3 +49,24 @@ index 891cfe384fd5ad0c45c43fe52e3da1ee7dbd8174..85058718627f49054ff51b4be1d0b4fd
  
              response = await axios.get(redirectUrl, {
                  httpsAgent,
+                 headers: {
+                     "User-Agent": "Mozilla/5.0"
+                 }
+             });
+         }
+ 
+         res.json(response.data);
+     } catch (error) {
+-        console.error("Proxy Error:", error.message || error);
+-        res.status(500).json({ error: "환율 데이터를 가져올 수 없습니다." });
++        const status = error.response?.status || 500;
++        const message = error.response?.data || error.message || "환율 데이터를 가져올 수 없습니다.";
++        console.error("Proxy Error:", { status, message });
++        res.status(status).json({ error: message });
+     }
+ });
+ 
+ const PORT = process.env.PORT || 3000;
+ app.listen(PORT, () => {
+     console.log(`✅ Proxy server is running on port ${PORT}`);
+ });
